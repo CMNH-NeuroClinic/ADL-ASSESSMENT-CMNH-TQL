@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d6b63">
+<title>ประเมิน ADL · ศูนย์ดูแลผู้สูงอายุ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Mitr:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2a31;--muted:#5a6b73;--paper:#edf3f1;--card:#fff;--line:#d5e0dd;
+  --teal:#0d6b63;--teal-d:#094f49;--teal-t:#dcefeb;
+  --social:#2f9e5f;--social-t:#e2f4ea;--social-d:#1b6b3f;
+  --home:#e2a11a;--home-t:#fcf0d0;--home-d:#7d5300;
+  --bed:#d24a4a;--bed-t:#fbe2e0;--bed-d:#992b2b;
+  --none:#c4cfcc;--none-t:#eef2f1;
+  --r:14px;
+  --font:'IBM Plex Sans Thai','Noto Sans Thai',system-ui,sans-serif;
+  --disp:'Mitr','IBM Plex Sans Thai',system-ui,sans-serif;
+}
+[data-g=social]{--gc:var(--social);--gt:var(--social-t);--gd:var(--social-d)}
+[data-g=home]{--gc:var(--home);--gt:var(--home-t);--gd:var(--home-d)}
+[data-g=bed]{--gc:var(--bed);--gt:var(--bed-t);--gd:var(--bed-d)}
+[data-g=none]{--gc:var(--none);--gt:var(--none-t);--gd:var(--muted)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--font)}
+body.lock{overflow:hidden}
+#app{max-width:600px;margin:0 auto;min-height:100dvh;padding:0 16px calc(104px + env(safe-area-inset-bottom))}
+h1,h2,h3{margin:0;font-family:var(--disp);font-weight:500;line-height:1.3}
+h1{font-size:22px}h2{font-size:18px;margin:24px 0 10px}h3{font-size:16px}
+p{margin:0}
+a{color:inherit;text-decoration:none}
+.mut{color:var(--muted);font-size:14px}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 0 12px}
+.top>div{flex:1;min-width:0}
+.top h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon{width:44px;height:44px;border-radius:50%;border:0;background:var(--card);display:grid;place-items:center;color:var(--ink);cursor:pointer;flex:none;box-shadow:0 0 0 1px var(--line) inset}
+.icon svg{width:22px;height:22px}
+
+/* buttons & fields */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--teal);color:#fff;font:500 16px var(--font);cursor:pointer;text-align:center}
+.btn:disabled{background:#a9bbb8;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--teal-d);box-shadow:0 0 0 1.5px var(--teal) inset}
+.btn.danger{background:var(--bed)}
+.btn.sm{min-height:40px;padding:0 14px;font-size:15px}
+.btn.block{width:100%}
+.field{display:block;margin:0 0 14px}
+.field>span{display:block;font-size:14px;font-weight:500;margin-bottom:4px}
+input[type=text],input[type=password],input[type=search],input[type=date],input[type=number],select,textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:16px var(--font);color:var(--ink)}
+textarea{min-height:88px;resize:vertical}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-size:16px}
+.check input{width:22px;height:22px;accent-color:var(--teal);flex:none}
+.err{color:var(--bed-d);font-size:14px;min-height:20px;margin:4px 0}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:40px;padding:0 14px;border-radius:20px;border:1.5px solid var(--line);background:#fff;font:500 15px var(--font);color:var(--ink);cursor:pointer}
+.chip b{font-weight:600;color:var(--muted);margin-left:2px}
+.chip[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip[aria-pressed=true] b{color:#d6efe9}
+
+/* cards */
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 0 0 1px var(--line) inset}
+.card+.card{margin-top:12px}
+.overview .seg{margin:12px 0 10px}
+.seg{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--none-t);gap:2px}
+.seg i{display:block;min-width:0}
+.seg i[data-g]{background:var(--gc)}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px}
+.legend li{display:flex;align-items:center;gap:6px}
+.legend li i{width:10px;height:10px;border-radius:50%;background:var(--gc)}
+.legend b{font-weight:600}
+.ov-n{font-size:14px;color:var(--muted)}
+.ov-n b{font:500 22px var(--disp);color:var(--ink);margin-right:4px}
+.alert{margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--home-t);color:var(--home-d);font-size:14px;font-weight:500}
+.banner{margin:0 0 10px;padding:8px 12px;border-radius:10px;background:var(--teal-t);color:var(--teal-d);font-size:14px}
+
+/* building card */
+.bcard{display:block;padding:14px 16px;background:var(--card);border-radius:var(--r);box-shadow:0 0 0 1px var(--line) inset;margin-bottom:10px}
+.bcard .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.bcard h3{font-size:17px}
+.bcard .seg{margin:10px 0 8px;height:10px}
+.bcard .mut b{color:var(--ink)}
+
+/* patient card — แถบสีซ้ายคือสัญญาณของกลุ่ม */
+.pcard{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;background:var(--card);border-radius:var(--r);padding:12px 12px 12px 16px;margin-bottom:10px;position:relative;box-shadow:0 0 0 1px var(--line) inset;overflow:hidden}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--gc)}
+.pcard .pname{font-weight:600;font-size:17px;line-height:1.35}
+.pcard .pscore{text-align:right;line-height:1.2}
+.pcard .pscore b{font:500 26px var(--disp);color:var(--ink)}
+.pcard .pscore span{font-size:13px;color:var(--muted)}
+.pcard .pscore em{display:block;font-style:normal;font-size:13px;font-weight:600;color:var(--gd)}
+.pcard .pact{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.flag{display:inline-block;font-size:13px;padding:1px 9px;border-radius:10px;background:var(--none-t);color:var(--muted);font-weight:500}
+.flag.warn{background:var(--home-t);color:var(--home-d)}
+.flag.bad{background:var(--bed-t);color:var(--bed-d)}
+.flag.good{background:var(--social-t);color:var(--social-d)}
+.search{margin:2px 0 12px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted)}
+
+/* patient page */
+.hero{display:flex;gap:16px;align-items:center;background:var(--gt);box-shadow:none}
+.hero .ht h2{margin:0 0 2px;color:var(--gd);font-size:22px}
+.ring{flex:none}
+.rt{fill:none;stroke:#fff;stroke-width:10}
+.rf{fill:none;stroke:var(--gc);stroke-width:10;stroke-linecap:round}
+.rn{font:500 30px var(--disp);fill:var(--ink)}
+.rs{font:12px var(--font);fill:var(--muted)}
+.plan{margin:8px 0 0;padding-left:20px}
+.plan li{margin:4px 0}
+.ibar{display:grid;grid-template-columns:1fr 64px 34px;gap:8px;align-items:center;padding:5px 0;font-size:15px}
+.ibar .tr{height:8px;border-radius:4px;background:var(--none-t);overflow:hidden}
+.ibar .tr i{display:block;height:100%;border-radius:4px}
+.ibar span:last-child{text-align:right;font-weight:600}
+.hrow{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
+.hrow:first-child{border-top:0}
+.hrow .sc{font:500 20px var(--disp);grid-row:span 2}
+.hrow .note{grid-column:2/-1;font-size:14px;color:var(--muted)}
+.trend{width:100%;height:auto;display:block}
+.trend text{font:11px var(--font);fill:var(--muted)}
+
+/* assessment form */
+.notice{padding:10px 14px;border-radius:12px;background:var(--teal-t);color:var(--teal-d);font-size:15px;font-weight:500;margin-bottom:6px}
+.sec{margin:22px 0 8px;display:flex;align-items:baseline;gap:8px}
+.sec small{color:var(--muted);font-size:14px}
+.item{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:0 0 0 1px var(--line) inset;border:0;min-width:0}
+.item legend{padding:0;font-weight:600;font-size:17px;float:left;width:100%;margin-bottom:8px}
+.item legend small{font-weight:400;color:var(--muted);font-size:14px;margin-left:6px}
+.item .hint{clear:both;font-size:14px;color:var(--home-d);background:var(--home-t);padding:4px 10px;border-radius:8px;margin-bottom:8px}
+.opt{position:relative;display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);margin-top:8px;cursor:pointer;min-height:52px;clear:both}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt .sc{flex:none;width:32px;height:32px;border-radius:50%;background:var(--none-t);display:grid;place-items:center;font:500 16px var(--disp)}
+.opt .tx{flex:1;padding-top:3px;line-height:1.45}
+.opt small{display:inline-block;margin-left:8px;font-size:12px;padding:0 8px;border-radius:9px;background:var(--none-t);color:var(--muted);font-weight:500}
+.opt.sel{border-color:var(--teal);background:var(--teal-t)}
+.opt.sel .sc{background:var(--teal);color:#fff}
+.opt:focus-within{outline:3px solid var(--teal);outline-offset:2px}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;box-shadow:0 -1px 0 var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.dock-in{max-width:600px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.dock.sig{border-top:6px solid var(--gc)}
+.dock .dk-l{flex:1;min-width:0;line-height:1.25}
+.dock .dk-score b{font:500 28px var(--disp)}
+.dock .dk-score span{color:var(--muted);font-size:14px}
+.dock .dk-g{font-size:14px;font-weight:600;color:var(--gd)}
+.dock .btn{flex:1}
+.dock.single .btn{width:100%}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(20,35,40,.5);z-index:30}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:600px;margin:0 auto;max-height:92dvh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));z-index:31}
+.sheet h2{margin:0 0 14px}
+.sheet .acts{display:flex;gap:10px;margin-top:8px}
+.sheet .acts .btn{flex:1}
+.menu{display:grid;gap:8px}
+.menu .btn{justify-content:flex-start}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:90%;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.toast.bad{background:var(--bed-d)}
+
+/* admin */
+.tabs{display:flex;gap:6px;margin:0 0 12px;overflow-x:auto}
+.tabs a{flex:none;padding:8px 14px;border-radius:20px;font-weight:500;background:#fff;box-shadow:0 0 0 1.5px var(--line) inset}
+.tabs a[aria-current=page]{background:var(--teal);color:#fff;box-shadow:none}
+.lrow{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;background:#fff;border-radius:12px;box-shadow:0 0 0 1px var(--line) inset;margin-bottom:8px;width:100%;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.lrow .mut{display:block}
+.login{padding-top:12vh}
+.login h1{font-size:28px;margin-bottom:4px}
+.login .card{margin-top:22px}
+
+.rep-f{display:flex;gap:8px;margin-bottom:12px}.rep-f select{flex:1}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi div{background:var(--none-t);border-radius:10px;padding:8px 10px}
+.kpi b{display:block;font:500 22px var(--disp);line-height:1.3}.kpi span{font-size:13px;color:var(--muted)}
+.mrow{display:grid;grid-template-columns:64px 1fr 30px;gap:8px;align-items:center;padding:5px 0;font-size:14px}
+.mrow .seg{height:12px}.mrow span:last-child{text-align:right;color:var(--muted)}
+.frow{display:block;padding:10px 0;border-top:1px solid var(--line)}.frow:first-child{border-top:0}
+.frow .flags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.hrow .pb{grid-column:3;grid-row:1}
+.menu .btn{justify-content:center}
+
+/* ----- เอกสารพิมพ์ ----- */
+#printarea{display:none}
+.pd{font:12pt/1.5 var(--font);color:#000}
+.pd h1{font:500 16pt/1.4 var(--disp);text-align:center;margin:2px 0 8px}
+.pd h2{font-size:14pt;margin:14px 0 6px}.pd h3{font:500 12.5pt var(--disp);margin:14px 0 4px}
+.pd .org{text-align:center;font-size:11pt;margin:0}
+.pd table{width:100%;border-collapse:collapse;margin:6px 0}
+.pd th,.pd td{border:1px solid #444;padding:3px 8px;vertical-align:top;font-size:10.5pt}
+.pd th{background:#e9e9e9;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pd tr{page-break-inside:avoid}
+.pd .kv{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;margin:8px 0}
+.pd .res{border:2px solid #000;padding:8px 14px;margin:10px 0;display:flex;gap:16px;align-items:center;page-break-inside:avoid}
+.pd .res .big{font:500 30pt/1 var(--disp)}.pd .res .big small{font-size:12pt}
+.pd ul{margin:2px 0 8px;padding-left:22px}.pd p{margin:4px 0}
+.pd .sig{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:center;margin-top:34px;page-break-inside:avoid;font-size:10.5pt}
+.pd .sig div{border-top:1px solid #000;padding-top:4px;margin-top:38px}
+.pd .pfoot{margin-top:18px;font-size:9pt;color:#444;text-align:center}
+.pd .pbreak{page-break-after:always}
+@media print{
+  @page{size:A4;margin:14mm}
+  html,body{background:#fff!important}
+  body.lock{overflow:visible}
+  #app,#modal,#toast{display:none!important}
+  #printarea{display:block}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" hidden></div>
+<div id="printarea" aria-hidden="true"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript>ต้องเปิดใช้งาน JavaScript</noscript>
+
+<script>
+'use strict';
+/* ===================== ตั้งค่า ===================== */
+const CONFIG = {
+  API_URL: '',          // ← วาง URL /exec ของ Apps Script ที่นี่ (ถ้าเว้นว่าง = โหมดทดลอง ข้อมูลเก็บในเครื่องนี้)
+  REASSESS_DAYS: 30     // ครบกำหนดประเมินซ้ำเมื่อเกินกี่วัน
+};
+
+/* ===================== ข้อมูลแบบประเมิน (Barthel ADL Index, รวม 20) ===================== */
+const SECTIONS = [
+  {id:'self', th:'การดูแลตนเอง', en:'Self Care'},
+  {id:'mob',  th:'การเคลื่อนไหว', en:'Mobility'},
+  {id:'exc',  th:'การขับถ่าย', en:'Excretion'}
+];
+const ITEMS = [
+  {k:'feeding', s:'self', th:'การกินอาหาร', en:'Feeding', o:[
+    [0,'ไม่สามารถตักอาหารเข้าปากเองได้ ต้องมีคนป้อน'],
+    [1,'ตักอาหารเองได้ แต่ต้องมีคนช่วยบางส่วน เช่น หั่นหรือเตรียมอาหารให้'],
+    [2,'ตักอาหารกินได้เองตามปกติ']]},
+  {k:'grooming', s:'self', th:'ล้างหน้า แปรงฟัน หวีผม', en:'Grooming', o:[
+    [0,'ต้องมีคนช่วย'],
+    [1,'ทำได้เอง (ล้างหน้า แปรงฟัน หวีผม)']]},
+  {k:'dressing', s:'self', th:'การสวมใส่เสื้อผ้า', en:'Dressing', o:[
+    [0,'ต้องมีคนสวมใส่ให้ทั้งหมด'],
+    [1,'ช่วยตัวเองได้ประมาณครึ่งหนึ่ง'],
+    [2,'ทำได้เอง (ติดกระดุม รูดซิป ใส่รองเท้า)']]},
+  {k:'bathing', s:'self', th:'การอาบน้ำ', en:'Bathing', o:[
+    [0,'ต้องมีคนช่วย'],
+    [1,'อาบน้ำถูตัวได้เอง']]},
+  {k:'transfer', s:'mob', th:'การลุกนั่งจากที่นอน', en:'Transfer', o:[
+    [0,'ไม่สามารถนั่งทรงตัวได้ หรือต้องใช้คน 2 คนช่วยยก'],
+    [1,'ต้องมีคนช่วยพยุงมาก (1–2 คน) จึงจะนั่งได้'],
+    [2,'ต้องมีคนช่วยเล็กน้อย หรือคอยบอก/ดูความปลอดภัย'],
+    [3,'ลุกนั่งเองได้อย่างปลอดภัย']]},
+  {k:'mobility', s:'mob', th:'การเดินภายในบ้าน', en:'Mobility', hint:'ต้องเดินได้ 45 เมตร จึงจะได้คะแนนเต็ม', o:[
+    [0,'เคลื่อนที่ไม่ได้ หรือเดิน/เข็นรถเข็นเองไม่ถึง 45 เมตร'],
+    [1,'ใช้รถเข็นเองได้ (รวมการเลี้ยว) เกิน 45 เมตร'],
+    [2,'เดินได้เกิน 45 เมตร โดยต้องมีคนช่วยพยุงหรือคอยดูแล'],
+    [3,'เดินได้เอง เกิน 45 เมตร (ใช้ไม้เท้า/walker ได้)']]},
+  {k:'stairs', s:'mob', th:'การขึ้นลงบันได 1 ชั้น', en:'Stairs', o:[
+    [0,'ทำไม่ได้'],
+    [1,'ต้องมีคนช่วยพยุงหรือคอยดู'],
+    [2,'ขึ้นลงได้เองอย่างปลอดภัย']]},
+  {k:'toilet', s:'exc', th:'การใช้ห้องน้ำ / ส้วม', en:'Toilet Use', o:[
+    [0,'ช่วยตัวเองไม่ได้'],
+    [1,'ทำได้บ้าง ต้องมีคนช่วยบางส่วน (ทรงตัว ถอดเสื้อผ้า ทำความสะอาด)'],
+    [2,'ช่วยตัวเองได้ดี']]},
+  {k:'bowel', s:'exc', th:'การกลั้นอุจจาระ', en:'Bowel', o:[
+    [0,'กลั้นไม่ได้ หรือต้องสวนอุจจาระ'],
+    [1,'กลั้นไม่ได้เป็นบางครั้ง (ไม่เกิน 1 ครั้ง/สัปดาห์)'],
+    [2,'กลั้นได้ปกติ ไม่ราด']]},
+  {k:'bladder', s:'exc', th:'การกลั้นปัสสาวะ', en:'Bladder', o:[
+    [0,'กลั้นไม่ได้ หรือใส่สายสวนและจัดการเองไม่ได้'],
+    [1,'กลั้นไม่ได้เป็นบางครั้ง (ไม่เกิน 1 ครั้ง/วัน)'],
+    [2,'กลั้นได้ปกติ ไม่ซึม']]}
+];
+const MAXS = Object.fromEntries(ITEMS.map(i => [i.k, Math.max(...i.o.map(o => o[0]))]));
+const GROUPS = {
+  social:{label:'ติดสังคม', sub:'ช่วยเหลือตัวเองได้ดี', range:'12–20', plan:[
+    'ส่งเสริมสุขภาพ ให้ทำกิจกรรมและเข้าร่วมกิจกรรมกับผู้อื่น','คงความสามารถเดิมไว้ และประเมินซ้ำตามกำหนด']},
+  home:{label:'ติดบ้าน', sub:'ต้องการความช่วยเหลือบ้าง', range:'5–11', plan:[
+    'ระวังการหกล้ม (Fall prevention)','กระตุ้นให้ทำเองเท่าที่ทำได้ (Encourage self-care)','จัดสิ่งแวดล้อมให้ปลอดภัย']},
+  bed:{label:'ติดเตียง', sub:'ช่วยตัวเองไม่ได้เลย', range:'0–4', plan:[
+    'พลิกตะแคงตัวทุก 2 ชั่วโมง เพื่อป้องกันแผลกดทับ','ดูแลความสะอาดร่างกาย (Hygiene)','ระวังการสำลักขณะให้อาหาร']}
+};
+const RANK = {bed:0, home:1, social:2};
+const groupOf = t => t >= 12 ? 'social' : t >= 5 ? 'home' : 'bed';
+const FALLS = [
+  {id:'sedative', t:'ใช้ยาที่ทำให้ง่วงซึม (เช่น ยานอนหลับ)'},
+  {id:'env',      t:'พื้นลื่น หรือพื้นต่างระดับในพื้นที่ที่ใช้'},
+  {id:'balance',  t:'ทรงตัวไม่ดี'},
+  {id:'urgency',  t:'กลั้นปัสสาวะไม่อยู่ ต้องรีบเข้าห้องน้ำ'}
+];
+
+/* ===================== สถานะและ util ===================== */
+const S = {token:null,user:null,branches:[],buildings:[],patients:[],latest:{},branchId:null,filter:'all',q:'',adminBranch:'all',adminQ:'',rep:{branch:'all',days:90}};
+let A = null;          // ฟอร์มประเมินที่กำลังกรอก
+const H = {}; const R = {assess:null, rep:null};          // cache ประวัติ
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toLocaleDateString('sv-SE', {timeZone:'Asia/Bangkok'});
+const dayNum = s => { const [y,m,d] = s.split('-').map(Number); return Date.UTC(y, m-1, d) / 864e5; };
+const daysSince = s => Math.round(dayNum(today()) - dayNum(s));
+const fmtDate = s => { if (!s) return '-'; const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}); };
+const ageOf = p => p.birthYear ? new Date().getFullYear() - Number(p.birthYear) : null;
+const branchOf = id => S.branches.find(b => b.id === id);
+const bShort = id => { const b = branchOf(id); return b ? (b.shortName || b.name) : ''; };
+const bldOf = id => S.buildings.find(b => b.id === id);
+const isAdmin = () => S.user && S.user.role === 'admin';
+const activePatients = () => S.patients.filter(p => p.status !== 'discharged');
+const ICON = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'
+};
+function toast(msg, bad) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast on' + (bad ? ' bad' : '');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.className = 'toast', 3200);
+}
+
+/* ===================== API (Apps Script) + โหมดทดลอง ===================== */
+async function api(action, payload = {}) {
+  if (!CONFIG.API_URL) return Demo.call(action, payload);
+  const res = await fetch(CONFIG.API_URL, {method:'POST', body: JSON.stringify({action, token:S.token, ...payload})}); // ไม่ใส่ header เพื่อเลี่ยง CORS preflight
+  const j = await res.json();
+  if (!j.ok) { if (j.error === 'AUTH') { logout(); throw new Error('หมดเวลาการใช้งาน กรุณาเข้าสู่ระบบใหม่'); } throw new Error(j.error); }
+  return j.data;
+}
+
+/* ===================== การคำนวณสรุป ===================== */
+function stats(list) {
+  const s = {social:0, home:0, bed:0, none:0, overdue:0, n:list.length};
+  list.forEach(p => {
+    const l = S.latest[p.id]?.last;
+    if (!l) { s.none++; return; }
+    s[l.group]++;
+    if (daysSince(l.date) > CONFIG.REASSESS_DAYS) s.overdue++;
+  });
+  return s;
+}
+function segBar(s) {
+  const n = s.n || 1;
+  return `<div class="seg" role="img" aria-label="ติดสังคม ${s.social} ติดบ้าน ${s.home} ติดเตียง ${s.bed} ยังไม่ประเมิน ${s.none}">` +
+    ['social','home','bed','none'].map(g => s[g] ? `<i data-g="${g}" style="flex:${s[g]/n}"></i>` : '').join('') + '</div>';
+}
+function legend(s) {
+  return '<ul class="legend">' + ['social','home','bed','none'].map(g =>
+    `<li data-g="${g}"><i></i>${g === 'none' ? 'ยังไม่ประเมิน' : GROUPS[g].label} <b>${s[g]}</b></li>`).join('') + '</ul>';
+}
+
+/* ===================== Views ===================== */
+function topbar(title, sub) {
+  return `<header class="top"><div><h1>${esc(title)}</h1><p class="mut">${esc(sub)}</p></div><button class="icon" data-act="menu" aria-label="เมนู">${ICON.dots}</button></header>`;
+}
+function backbar(href, title, sub) {
+  return `<header class="top"><a class="icon" href="${href}" aria-label="ย้อนกลับ">${ICON.back}</a><div><h1>${esc(title)}</h1><p class="mut">${esc(sub || '')}</p></div></header>`;
+}
+const demoBanner = () => CONFIG.API_URL ? '' : '<p class="banner">โหมดทดลอง — ข้อมูลอยู่ในเครื่องนี้เท่านั้น ยังไม่ได้เชื่อมต่อ Google Sheets</p>';
+const notFound = () => `${backbar('#/', 'ไม่พบข้อมูล')}<p class="empty">ไม่พบหน้าที่ต้องการ อาจถูกลบหรือไม่มีสิทธิ์เข้าถึง</p>`;
+
+function loginView() {
+  return `<main class="login"><h1>ประเมิน ADL</h1><p class="mut">สำหรับพนักงาน — เชียงใหม่เนอร์สซิ่งโฮมแคร์ และ แทรงควิลา เอลเดอร์ลี่แคร์</p>
+  <form class="card" data-form="login">
+    ${demoBanner()}
+    ${CONFIG.API_URL ? '' : '<p class="mut" style="margin-bottom:10px">บัญชีทดลอง: <b>admin</b> (ผู้ดูแล) หรือ <b>nurse</b> (พนักงาน) · PIN 1234</p>'}
+    <label class="field"><span>ชื่อผู้ใช้</span><input type="text" name="username" autocomplete="username" autocapitalize="none" required value="${esc(localStorage.getItem('adl_user') || '')}"></label>
+    <label class="field"><span>PIN</span><input type="password" name="pin" inputmode="numeric" autocomplete="current-password" required></label>
+    <p class="err" id="lerr"></p>
+    <button class="btn block" type="submit">เข้าสู่ระบบ</button>
+  </form></main>`;
+}
+
+function homeView() {
+  const scope = S.branchId === 'all' ? S.branches.map(b => b.id) : [S.branchId];
+  const blds = S.buildings.filter(b => b.active !== 'FALSE' && scope.includes(b.branchId));
+  const pts = activePatients().filter(p => scope.includes(p.branchId));
+  const st = stats(pts);
+  const chip = (id, l) => `<button class="chip" aria-pressed="${S.branchId === id}" data-act="branch" data-id="${esc(id)}">${esc(l)}</button>`;
+  return `${topbar('ประเมิน ADL', S.user.name)}
+  ${demoBanner()}
+  <nav class="chips" aria-label="เลือกสาขา">${S.branches.length > 1 ? chip('all', 'ทุกสาขา') : ''}${S.branches.map(b => chip(b.id, b.shortName || b.name)).join('')}</nav>
+  <section class="card overview" aria-label="สรุปภาพรวม">
+    <p class="ov-n"><b>${st.n}</b>ผู้รับบริการที่พักอยู่</p>
+    ${segBar(st)}${legend(st)}
+    ${st.overdue ? `<p class="alert">ครบกำหนดประเมินซ้ำ ${st.overdue} คน (เกิน ${CONFIG.REASSESS_DAYS} วัน)</p>` : ''}
+  </section>
+  ${isAdmin() ? '<a class="bcard" href="#/admin/report"><h3>รายงานภาพรวม</h3><p class="mut">สรุปกลุ่ม ADL ทุกสาขา ผู้ที่ต้องติดตาม และพิมพ์รายงาน</p></a>' : ''}
+  <h2>เลือกตึก</h2>
+  ${blds.length ? blds.map(b => {
+    const bp = pts.filter(p => p.buildingId === b.id), s = stats(bp);
+    return `<a class="bcard" href="#/b/${esc(b.id)}"><div class="row"><h3>${esc(b.name)}</h3><span class="mut">${S.branchId === 'all' ? esc(bShort(b.branchId)) + ' · ' : ''}${s.n} คน</span></div>
+      ${segBar(s)}<p class="mut">ติดสังคม <b>${s.social}</b> · ติดบ้าน <b>${s.home}</b> · ติดเตียง <b>${s.bed}</b>${s.none ? ` · ยังไม่ประเมิน <b>${s.none}</b>` : ''}${s.overdue ? ` · <span style="color:var(--home-d)">ครบกำหนด <b>${s.overdue}</b></span>` : ''}</p></a>`;
+  }).join('') : '<p class="empty">ยังไม่มีตึกในสาขานี้ ผู้ดูแลระบบเพิ่มได้ที่เมนู ตั้งค่า</p>'}`;
+}
+
+function matchFilter(p, f) {
+  const l = S.latest[p.id]?.last;
+  if (f === 'all') return true;
+  if (f === 'none') return !l;
+  if (f === 'due') return !!l && daysSince(l.date) > CONFIG.REASSESS_DAYS;
+  return !!l && l.group === f;
+}
+function flagsOf(p) {
+  const e = S.latest[p.id], l = e?.last, out = [];
+  if (!l) return '<span class="flag">ยังไม่เคยประเมิน</span>';
+  const d = daysSince(l.date);
+  out.push(`<span class="flag${d > CONFIG.REASSESS_DAYS ? ' warn' : ''}">ประเมินล่าสุด ${fmtDate(l.date)}</span>`);
+  if (e.prev) {
+    if (RANK[l.group] < RANK[e.prev.group]) out.push('<span class="flag bad">ระดับลดลงจากครั้งก่อน</span>');
+    else if (RANK[l.group] > RANK[e.prev.group]) out.push('<span class="flag good">ระดับดีขึ้น</span>');
+  }
+  if (l.fallRisks?.length) out.push(`<span class="flag warn">เสี่ยงหกล้ม ${l.fallRisks.length} ปัจจัย</span>`);
+  return out.join('');
+}
+function plist(bid) {
+  const q = S.q.trim().toLowerCase();
+  const list = activePatients().filter(p => p.buildingId === bid && matchFilter(p, S.filter) &&
+    (!q || [p.name, p.nickname, p.room, p.hn].some(x => String(x || '').toLowerCase().includes(q))))
+    .sort((a, b) => String(a.room).localeCompare(String(b.room), 'th', {numeric:true}) || a.name.localeCompare(b.name, 'th'));
+  if (!list.length) return '<p class="empty">ไม่พบผู้รับบริการตามเงื่อนไขนี้</p>';
+  return list.map(p => {
+    const l = S.latest[p.id]?.last, a = ageOf(p);
+    return `<article class="pcard" data-g="${l ? l.group : 'none'}">
+      <a href="#/p/${esc(p.id)}"><div class="pname">${esc(p.name)}${p.nickname ? ` <span class="mut">(${esc(p.nickname)})</span>` : ''}</div>
+        <div class="mut">ห้อง ${esc(p.room || '-')}${a ? ` · ${a} ปี` : ''}</div></a>
+      <div class="pscore">${l ? `<b>${l.total}</b><span>/20</span><em>${GROUPS[l.group].label}</em>` : '<span>—</span>'}</div>
+      <div class="pact">${flagsOf(p)}<span style="flex:1"></span><a class="btn sm" href="#/a/${esc(p.id)}">ประเมิน</a></div></article>`;
+  }).join('');
+}
+function buildingView(id) {
+  const b = bldOf(id); if (!b) return notFound();
+  const all = activePatients().filter(p => p.buildingId === id), st = stats(all);
+  const chips = [['all','ทั้งหมด',all.length],['social','ติดสังคม',st.social],['home','ติดบ้าน',st.home],['bed','ติดเตียง',st.bed],['none','ยังไม่ประเมิน',st.none],['due','ครบกำหนด',st.overdue]];
+  return `${backbar('#/', b.name, branchOf(b.branchId)?.name)}
+  <div class="card overview">${segBar(st)}${legend(st)}</div>
+  <nav class="chips" style="margin-top:12px" aria-label="กรองตามกลุ่ม">${chips.map(([k, l, n]) =>
+    `<button class="chip" aria-pressed="${S.filter === k}" data-act="filter" data-id="${k}">${l} <b>${n}</b></button>`).join('')}</nav>
+  <input class="search" type="search" id="q" placeholder="ค้นหา ชื่อ / ห้อง / HN" value="${esc(S.q)}" aria-label="ค้นหา">
+  <div id="plist">${plist(id)}</div>
+  <button class="btn ghost block" data-act="printCensus" data-id="${esc(id)}">พิมพ์รายชื่อและผลประเมินของตึกนี้</button>`;
+}
+
+function ring(total) {
+  const r = 42, c = 2 * Math.PI * r;
+  return `<svg class="ring" viewBox="0 0 100 100" width="104" height="104" role="img" aria-label="คะแนน ${total} จาก 20">
+  <circle cx="50" cy="50" r="${r}" class="rt"/><circle cx="50" cy="50" r="${r}" class="rf" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - total / 20)).toFixed(1)}" transform="rotate(-90 50 50)"/>
+  <text x="50" y="54" text-anchor="middle" class="rn">${total}</text><text x="50" y="70" text-anchor="middle" class="rs">จาก 20</text></svg>`;
+}
+function patientView(id) {
+  const p = S.patients.find(x => x.id === id); if (!p) return notFound();
+  const l = S.latest[id]?.last, b = bldOf(p.buildingId), a = ageOf(p);
+  const sub = `${b ? b.name : ''} · ห้อง ${p.room || '-'}${a ? ' · ' + a + ' ปี' : ''}${p.hn ? ' · HN ' + p.hn : ''}`;
+  let body;
+  if (!l) body = `<section class="card empty">ยังไม่เคยประเมิน ADL<br>กด “ประเมินครั้งแรก” เพื่อเริ่ม</section>`;
+  else {
+    const g = GROUPS[l.group];
+    body = `<section class="card hero" data-g="${l.group}">${ring(l.total)}<div class="ht"><h2>${g.label}</h2><p>${g.sub}</p>
+        <p class="mut">คะแนน ${g.range} · ประเมิน ${fmtDate(l.date)} โดย ${esc(l.assessorName)}</p></div></section>
+      <section class="card"><h3>แนวทางการดูแล</h3><ul class="plan">${g.plan.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+        ${l.fallRisks?.length ? `<p style="margin-top:10px"><b>ปัจจัยเสี่ยงหกล้มที่พบ:</b> ${l.fallRisks.map(f => esc(FALLS.find(x => x.id === f)?.t || f)).join(' · ')}</p>` : ''}
+        ${l.note ? `<p class="mut" style="margin-top:8px">หมายเหตุ: ${esc(l.note)}</p>` : ''}</section>
+      <section class="card"><h3>รายข้อ (ครั้งล่าสุด)</h3>${ITEMS.map(it => {
+        const v = l.scores[it.k], m = MAXS[it.k], col = v === 0 ? 'var(--bed)' : v === m ? 'var(--social)' : 'var(--home)';
+        return `<div class="ibar"><span>${esc(it.th)}</span><span class="tr"><i style="width:${(v / m * 100)}%;background:${col}"></i></span><span>${v}/${m}</span></div>`;
+      }).join('')}</section>`;
+  }
+  return `${backbar('#/b/' + p.buildingId, p.name, sub)}${body}<div id="histbox"></div>
+  <div class="dock single"><div class="dock-in">${l ? `<button class="btn ghost" data-act="printLast" data-id="${esc(id)}">พิมพ์ใบประเมิน</button>` : ''}<a class="btn" href="#/a/${esc(id)}">${l ? 'ประเมินใหม่' : 'ประเมินครั้งแรก'}</a></div></div>`;
+}
+function trendSvg(list) {
+  const pts = list.slice(0, 12).reverse(), n = pts.length;
+  const L = 26, R = 10, T = 8, B = 22, W = 320, Hh = 150, iw = W - L - R, ih = Hh - T - B;
+  const y = v => T + (1 - v / 20) * ih, x = i => n === 1 ? L + iw / 2 : L + i * iw / (n - 1);
+  const band = (a, b, c) => `<rect x="${L}" y="${y(b)}" width="${iw}" height="${y(a) - y(b)}" style="fill:var(--${c}-t)"/>`;
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.total).toFixed(1)}`).join(' ');
+  return `<svg class="trend" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="กราฟคะแนน ADL ตามเวลา">
+    ${band(0, 4.5, 'bed')}${band(4.5, 11.5, 'home')}${band(11.5, 20, 'social')}
+    ${[0,5,12,20].map(v => `<text x="${L - 5}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
+    ${n > 1 ? `<path d="${path}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>` : ''}
+    ${pts.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.total).toFixed(1)}" r="5" style="fill:var(--${p.group});stroke:#fff;stroke-width:2"/>`).join('')}
+    <text x="${L}" y="${Hh - 5}">${fmtDate(pts[0].date)}</text>${n > 1 ? `<text x="${W - R}" y="${Hh - 5}" text-anchor="end">${fmtDate(pts[n - 1].date)}</text>` : ''}</svg>`;
+}
+function histHtml(pid) {
+  const list = H[pid] || [];
+  if (!list.length) return '';
+  return `<section class="card" style="margin-top:12px"><h3 style="margin-bottom:8px">แนวโน้มคะแนน</h3>${trendSvg(list)}</section>
+  <section class="card"><h3>ประวัติการประเมิน</h3>${list.map(a =>
+    `<div class="hrow" data-g="${a.group}"><span class="sc">${a.total}</span><span><b style="color:var(--gd)">${GROUPS[a.group].label}</b> · ${fmtDate(a.date)}<span class="mut" style="display:block">${esc(a.assessorName)}</span></span><button class="btn ghost sm pb" data-act="printA" data-pid="${esc(a.patientId)}" data-aid="${esc(a.id)}">พิมพ์</button>${a.note ? `<span class="note">${esc(a.note)}</span>` : ''}</div>`).join('')}</section>`;
+}
+async function loadHistory(pid) {
+  if (H[pid]) { const b = $('#histbox'); if (b) b.innerHTML = histHtml(pid); }
+  try { H[pid] = await api('history', {patientId: pid}); } catch (e) { toast(e.message, true); return; }
+  const box = $('#histbox'); if (box && location.hash === '#/p/' + pid) box.innerHTML = histHtml(pid);
+}
+
+function assessView(pid) {
+  const p = S.patients.find(x => x.id === pid); if (!p) return notFound();
+  if (!A || A.pid !== pid) A = {pid, scores:{}, falls:[], note:'', date:today()};
+  const prev = S.latest[pid]?.last;
+  const sect = SECTIONS.map(sc => `<div class="sec"><h2 style="margin:0">${sc.th}</h2><small>${sc.en}</small></div>` +
+    ITEMS.filter(i => i.s === sc.id).map(it => `<fieldset class="item"><legend>${esc(it.th)}<small>${it.en}</small></legend>
+      ${it.hint ? `<p class="hint">${esc(it.hint)}</p>` : ''}
+      ${it.o.map(([v, t]) => {
+        const checked = A.scores[it.k] === v, was = prev && prev.scores[it.k] === v;
+        return `<label class="opt${checked ? ' sel' : ''}"><input type="radio" name="${it.k}" value="${v}"${checked ? ' checked' : ''}><span class="sc">${v}</span><span class="tx">${esc(t)}${was ? '<small>ครั้งก่อน</small>' : ''}</span></label>`;
+      }).join('')}</fieldset>`).join('')).join('');
+  return `${backbar('#/p/' + pid, 'ประเมิน ADL', p.name)}
+  <p class="notice">ประเมินสิ่งที่ผู้รับบริการ “ทำได้จริง” ใน 24–48 ชั่วโมงที่ผ่านมา ไม่ใช่สิ่งที่ “น่าจะทำได้”</p>
+  <label class="field" style="margin-top:12px"><span>วันที่ประเมิน</span><input type="date" id="adate" value="${A.date}" max="${today()}"></label>
+  ${sect}
+  <div class="sec"><h2 style="margin:0">ปัจจัยเสี่ยงหกล้ม</h2><small>ติ๊กที่พบ (ไม่นับเป็นคะแนน)</small></div>
+  <div class="card">${FALLS.map(f => `<label class="check fr"><input type="checkbox" value="${f.id}"${A.falls.includes(f.id) ? ' checked' : ''}>${esc(f.t)}</label>`).join('')}</div>
+  <label class="field" style="margin-top:16px"><span>หมายเหตุ (ถ้ามี)</span><textarea id="anote" maxlength="500">${esc(A.note)}</textarea></label>
+  <div class="dock sig" id="dock" data-g="none"><div class="dock-in"><div class="dk-l"><div class="dk-score"><b id="tot">0</b><span>/20</span></div><div class="dk-g" id="dkg"></div></div>
+    <button class="btn" id="savebtn" data-act="save" disabled>บันทึกผล</button></div></div>`;
+}
+function updateDock() {
+  if (!A || !$('#dock')) return;
+  const n = Object.keys(A.scores).length, total = Object.values(A.scores).reduce((a, b) => a + b, 0);
+  $('#tot').textContent = total;
+  const done = n === ITEMS.length;
+  $('#dock').dataset.g = done ? groupOf(total) : 'none';
+  $('#dkg').textContent = done ? `${GROUPS[groupOf(total)].label} · ${GROUPS[groupOf(total)].sub}` : `ตอบแล้ว ${n}/${ITEMS.length} ข้อ`;
+  $('#savebtn').disabled = !done;
+}
+async function saveAssess() {
+  const btn = $('#savebtn'); btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+  try {
+    const rec = await api('saveAssessment', {patientId:A.pid, date:A.date, scores:A.scores, fallRisks:A.falls, note:A.note});
+    const cur = S.latest[A.pid];
+    if (!cur || rec.date >= cur.last.date) S.latest[A.pid] = {last:rec, prev:cur ? cur.last : null};
+    const pid = A.pid, p = S.patients.find(x => x.id === pid); A = null; delete H[pid]; R.assess = null;
+    pendingModal = () => modal(`<h2>บันทึกผลแล้ว</h2>
+      <div class="card hero" data-g="${rec.group}" style="margin-bottom:14px">${ring(rec.total)}<div class="ht"><h2 style="font-size:20px">${GROUPS[rec.group].label}</h2><p>${esc(p ? p.name : '')}</p><p class="mut">${fmtDate(rec.date)}</p></div></div>
+      <div class="menu"><button class="btn" data-act="printA" data-pid="${esc(pid)}" data-aid="${esc(rec.id)}">พิมพ์ใบประเมิน</button>
+      <a class="btn ghost" href="#/b/${esc(p ? p.buildingId : '')}" data-act="close">กลับรายชื่อตึก (ประเมินคนถัดไป)</a>
+      <button class="btn ghost" data-act="close">ดูผลผู้รับบริการ</button></div>`);
+    location.hash = '#/p/' + pid;
+  } catch (e) { toast(e.message, true); btn.disabled = false; btn.textContent = 'บันทึกผล'; }
+}
+
+/* ---------- ตั้งค่า (ผู้ดูแลระบบ) ---------- */
+function adminView(tab) {
+  if (!isAdmin()) return notFound();
+  tab = ['report','patients','buildings','staff','export'].includes(tab) ? tab : 'report';
+  const tabs = [['report','รายงาน'],['patients','ผู้รับบริการ'],['buildings','ตึก'],['staff','พนักงาน'],['export','ส่งออก']];
+  let body = '';
+  if (tab === 'report') {
+    body = '<div id="rbody"><p class="empty">กำลังโหลด…</p></div>';
+  } else if (tab === 'patients') {
+    const q = S.adminQ.trim().toLowerCase();
+    const list = S.patients.filter(p => (S.adminBranch === 'all' || p.branchId === S.adminBranch) &&
+      (!q || [p.name, p.nickname, p.room, p.hn].some(x => String(x || '').toLowerCase().includes(q))))
+      .sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    body = `<div style="display:flex;gap:8px;margin-bottom:10px"><select id="ab" aria-label="สาขา"><option value="all">ทุกสาขา</option>${S.branches.map(b => `<option value="${b.id}"${S.adminBranch === b.id ? ' selected' : ''}>${esc(b.shortName || b.name)}</option>`).join('')}</select></div>
+      <input class="search" type="search" id="aq" placeholder="ค้นหา ชื่อ / ห้อง / HN" value="${esc(S.adminQ)}">
+      <button class="btn block" data-act="addPatient" style="margin-bottom:12px">+ เพิ่มผู้รับบริการ</button>
+      <div id="alist">${adminPlist(list)}</div>`;
+  } else if (tab === 'buildings') {
+    body = S.branches.map(b => `<h2>${esc(b.name)}</h2>${S.buildings.filter(x => x.branchId === b.id).map(x =>
+      `<button class="lrow" data-act="editBuilding" data-id="${esc(x.id)}"><span><b>${esc(x.name)}</b><span class="mut">${activePatients().filter(p => p.buildingId === x.id).length} คน</span></span>${x.active === 'FALSE' ? '<span class="flag">ปิดใช้งาน</span>' : ''}</button>`).join('')}
+      <button class="btn ghost sm" data-act="addBuilding" data-id="${esc(b.id)}">+ เพิ่มตึก</button>`).join('');
+  } else if (tab === 'staff') {
+    body = '<p class="empty">กำลังโหลด…</p>';
+  } else {
+    body = `<section class="card"><h3>ส่งออกประวัติการประเมินทั้งหมด</h3><p class="mut" style="margin:6px 0 12px">ไฟล์ CSV เปิดด้วย Excel ได้ ภาษาไทยไม่เพี้ยน — เก็บไฟล์ให้ปลอดภัย เพราะมีข้อมูลสุขภาพ</p><button class="btn" data-act="export">ดาวน์โหลด CSV</button></section>`;
+  }
+  return `${backbar('#/', 'ตั้งค่า', 'ผู้ดูแลระบบ')}<nav class="tabs" aria-label="หมวดตั้งค่า">${tabs.map(([k, l]) => `<a href="#/admin/${k}"${k === tab ? ' aria-current="page"' : ''}>${l}</a>`).join('')}</nav><div id="abody">${body}</div>`;
+}
+function adminPlist(list) {
+  if (!list.length) return '<p class="empty">ไม่พบข้อมูล</p>';
+  return list.map(p => `<button class="lrow" data-act="editPatient" data-id="${esc(p.id)}"><span><b>${esc(p.name)}</b><span class="mut">${esc(bShort(p.branchId))} · ${esc(bldOf(p.buildingId)?.name || '')} · ห้อง ${esc(p.room || '-')}</span></span>${p.status === 'discharged' ? '<span class="flag">จำหน่ายแล้ว</span>' : ''}</button>`).join('');
+}
+async function loadStaff() {
+  try {
+    const list = await api('listStaff'); if (!$('#abody') || !location.hash.startsWith('#/admin/staff')) return;
+    S.staff = list;
+    $('#abody').innerHTML = `<button class="btn block" data-act="addStaff" style="margin-bottom:12px">+ เพิ่มพนักงาน</button>` + list.map(s =>
+      `<button class="lrow" data-act="editStaff" data-id="${esc(s.username)}"><span><b>${esc(s.name)}</b><span class="mut">${esc(s.username)} · ${s.role === 'admin' ? 'ผู้ดูแลระบบ' : 'พนักงาน'}</span></span>${s.active === 'FALSE' ? '<span class="flag">ปิดใช้งาน</span>' : ''}</button>`).join('');
+  } catch (e) { toast(e.message, true); }
+}
+
+/* ---------- modal & ฟอร์ม ---------- */
+function modal(html) {
+  const m = $('#modal'); m.innerHTML = `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  m.hidden = false; document.body.classList.add('lock');
+}
+function closeModal() { const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('lock'); }
+const acts = (label = 'บันทึก') => `<p class="err" id="ferr"></p><div class="acts"><button type="button" class="btn ghost" data-act="close">ยกเลิก</button><button type="submit" class="btn">${label}</button></div>`;
+const opt = (v, t, sel) => `<option value="${esc(v)}"${sel ? ' selected' : ''}>${esc(t)}</option>`;
+
+function patientForm(p) {
+  const isNew = !p; p = p || {branchId: S.adminBranch !== 'all' ? S.adminBranch : S.branches[0]?.id, status:'active', admitDate:today()};
+  modal(`<h2>${isNew ? 'เพิ่มผู้รับบริการ' : 'แก้ไขผู้รับบริการ'}</h2><form data-form="patient">
+    <input type="hidden" name="id" value="${esc(p.id || '')}">
+    <label class="field"><span>ชื่อ-สกุล *</span><input type="text" name="name" required value="${esc(p.name || '')}"></label>
+    <label class="field"><span>ชื่อเล่น</span><input type="text" name="nickname" value="${esc(p.nickname || '')}"></label>
+    <label class="field"><span>HN / รหัสผู้รับบริการ</span><input type="text" name="hn" value="${esc(p.hn || '')}"></label>
+    <label class="field"><span>สาขา *</span><select name="branchId" id="f-branch">${S.branches.map(b => opt(b.id, b.shortName || b.name, b.id === p.branchId)).join('')}</select></label>
+    <label class="field"><span>ตึก *</span><select name="buildingId" id="f-bld"></select></label>
+    <label class="field"><span>ห้อง / เตียง</span><input type="text" name="room" value="${esc(p.room || '')}"></label>
+    <label class="field"><span>ปีเกิด (พ.ศ.)</span><input type="number" name="birthBE" inputmode="numeric" min="2400" max="2600" placeholder="เช่น 2490" value="${p.birthYear ? Number(p.birthYear) + 543 : ''}"></label>
+    <label class="field"><span>วันที่เข้าพัก</span><input type="date" name="admitDate" value="${esc(p.admitDate || '')}"></label>
+    <label class="field"><span>สถานะ</span><select name="status">${opt('active', 'พักอยู่', p.status !== 'discharged')}${opt('discharged', 'จำหน่ายแล้ว', p.status === 'discharged')}</select></label>
+    ${acts()}</form>`);
+  fillBuildings(p.buildingId);
+}
+function fillBuildings(sel) {
+  const b = $('#f-branch').value;
+  $('#f-bld').innerHTML = S.buildings.filter(x => x.branchId === b && (x.active !== 'FALSE' || x.id === sel)).map(x => opt(x.id, x.name, x.id === sel)).join('');
+}
+function buildingForm(x, branchId) {
+  modal(`<h2>${x ? 'แก้ไขตึก' : 'เพิ่มตึก'}</h2><form data-form="building"><input type="hidden" name="id" value="${esc(x?.id || '')}"><input type="hidden" name="branchId" value="${esc(x?.branchId || branchId)}">
+    <label class="field"><span>ชื่อตึก *</span><input type="text" name="name" required value="${esc(x?.name || '')}"></label>
+    ${x ? `<label class="check"><input type="checkbox" name="active"${x.active !== 'FALSE' ? ' checked' : ''}>เปิดใช้งาน</label>` : ''}${acts()}</form>`);
+}
+function staffForm(s) {
+  const all = s ? s.branchIds === '*' : false, ids = s ? s.branchIds.split(',') : [];
+  modal(`<h2>${s ? 'แก้ไขพนักงาน' : 'เพิ่มพนักงาน'}</h2><form data-form="staff">
+    <label class="field"><span>ชื่อผู้ใช้ (a-z, 0-9) *</span><input type="text" name="username" required autocapitalize="none" ${s ? 'readonly' : ''} value="${esc(s?.username || '')}"></label>
+    <label class="field"><span>ชื่อที่แสดง *</span><input type="text" name="name" required value="${esc(s?.name || '')}"></label>
+    <label class="field"><span>สิทธิ์</span><select name="role">${opt('staff', 'พนักงาน (ประเมินได้)', s?.role !== 'admin')}${opt('admin', 'ผู้ดูแลระบบ (ทุกสาขา + ตั้งค่า)', s?.role === 'admin')}</select></label>
+    <div class="field"><span>สาขาที่ดูแล (สำหรับพนักงาน)</span>${S.branches.map(b => `<label class="check"><input type="checkbox" name="br" value="${b.id}"${ids.includes(b.id) ? ' checked' : ''}>${esc(b.shortName || b.name)}</label>`).join('')}</div>
+    <label class="field"><span>${s ? 'PIN ใหม่ (เว้นว่างถ้าไม่เปลี่ยน)' : 'PIN (ตัวเลข 4–8 หลัก) *'}</span><input type="password" name="pin" inputmode="numeric" autocomplete="new-password" ${s ? '' : 'required'}></label>
+    <label class="check"><input type="checkbox" name="active"${s?.active !== 'FALSE' ? ' checked' : ''}>เปิดใช้งาน</label>${acts()}</form>`);
+}
+function pinForm(force) {
+  modal(`<h2>${force ? 'ตั้ง PIN ใหม่ก่อนใช้งาน' : 'เปลี่ยน PIN'}</h2><form data-form="pin">
+    <label class="field"><span>PIN เดิม</span><input type="password" name="oldPin" inputmode="numeric" required autocomplete="current-password"></label>
+    <label class="field"><span>PIN ใหม่ (ตัวเลข 4–8 หลัก)</span><input type="password" name="newPin" inputmode="numeric" required autocomplete="new-password"></label>
+    <p class="err" id="ferr"></p><div class="acts">${force ? '' : '<button type="button" class="btn ghost" data-act="close">ยกเลิก</button>'}<button type="submit" class="btn">บันทึก PIN</button></div></form>`);
+}
+function menuModal() {
+  modal(`<h2>${esc(S.user.name)}</h2><div class="menu">
+    ${isAdmin() ? '<a class="btn ghost" href="#/admin/report" data-act="close">รายงานและตั้งค่า</a>' : ''}
+    <button class="btn ghost" data-act="pin">เปลี่ยน PIN</button>
+    ${CONFIG.API_URL ? '' : '<button class="btn ghost" data-act="resetDemo">รีเซ็ตข้อมูลทดลอง</button>'}
+    <button class="btn ghost" data-act="logout">ออกจากระบบ</button></div>`);
+}
+
+async function submitForm(form) {
+  const f = Object.fromEntries(new FormData(form)), kind = form.dataset.form, err = $('#lerr') || $('#ferr');
+  const btn = form.querySelector('[type=submit]'); if (btn) btn.disabled = true;
+  try {
+    if (kind === 'login') {
+      const d = await api('login', {username:f.username, pin:f.pin});
+      S.token = d.token; localStorage.setItem('adl_token', d.token); localStorage.setItem('adl_user', f.username.trim().toLowerCase());
+      await loadAll(); location.hash = '#/'; render();
+      if (S.user.mustChangePin) pinForm(true);
+    } else if (kind === 'patient') {
+      const by = Number(f.birthBE); const birthYear = by ? (by > 2400 ? by - 543 : by) : '';
+      await api('savePatient', {...f, birthYear}); await loadAll(); closeModal(); render(true); toast('บันทึกแล้ว');
+    } else if (kind === 'building') {
+      await api('saveBuilding', {id:f.id, branchId:f.branchId, name:f.name, active: f.id ? !!f.active : true}); await loadAll(); closeModal(); render(true); toast('บันทึกแล้ว');
+    } else if (kind === 'staff') {
+      const br = [...form.querySelectorAll('[name=br]:checked')].map(x => x.value).join(',');
+      await api('saveStaff', {username:f.username, name:f.name, role:f.role, branchIds:br, pin:f.pin, active:!!f.active});
+      closeModal(); toast('บันทึกแล้ว'); loadStaff();
+    } else if (kind === 'pin') {
+      await api('changePin', {oldPin:f.oldPin, newPin:f.newPin}); S.user.mustChangePin = false; closeModal(); toast('เปลี่ยน PIN แล้ว');
+    }
+  } catch (e) { if (err) err.textContent = e.message; if (btn) btn.disabled = false; }
+}
+
+function toCsv(rows) {
+  return '\ufeff' + rows.map(r => r.map(c => { c = String(c ?? ''); return /[",\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(',')).join('\r\n');
+}
+async function exportCsv() {
+  try {
+    const rows = await api('exportAll');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([toCsv(rows)], {type:'text/csv;charset=utf-8'}));
+    a.download = `adl-${today()}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) { toast(e.message, true); }
+}
+
+/* ===================== พิมพ์เอกสาร ===================== */
+let pendingModal = null;
+const pdate = () => new Date().toLocaleString('th-TH', {timeZone:'Asia/Bangkok', dateStyle:'medium', timeStyle:'short'});
+const pfoot = () => `<p class="pfoot">พิมพ์เมื่อ ${pdate()} · ระบบประเมิน ADL — เอกสารมีข้อมูลสุขภาพส่วนบุคคล โปรดเก็บรักษาอย่างปลอดภัย</p>`;
+function doPrint(html, title) {
+  $('#printarea').innerHTML = html;
+  const old = document.title; document.title = title;
+  const done = () => { document.title = old; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => window.print(), 120);
+}
+function assessDoc(p, rec, prev) {
+  const b = bldOf(p.buildingId), br = branchOf(p.branchId), g = GROUPS[rec.group], a = ageOf(p);
+  const rows = SECTIONS.map(sc => `<tr><th colspan="3">${sc.th} (${sc.en})</th></tr>` + ITEMS.filter(i => i.s === sc.id).map(it => {
+    const v = rec.scores[it.k], o = it.o.find(x => x[0] === v);
+    return `<tr><td style="width:30%">${esc(it.th)}<br><small>${it.en}</small></td><td>${esc(o ? o[1] : '')}</td><td style="text-align:center;white-space:nowrap;width:64px"><b>${v}</b> / ${MAXS[it.k]}</td></tr>`;
+  }).join('')).join('');
+  const diff = prev ? rec.total - prev.total : 0;
+  const cmp = prev ? `ครั้งก่อน ${fmtDate(prev.date)}: ${prev.total} คะแนน (${GROUPS[prev.group].label}) · เปลี่ยนแปลง ${diff > 0 ? '+' : ''}${diff} คะแนน${RANK[rec.group] < RANK[prev.group] ? ' · ระดับลดลง' : RANK[rec.group] > RANK[prev.group] ? ' · ระดับดีขึ้น' : ''}` : 'ยังไม่มีผลประเมินครั้งก่อนสำหรับเปรียบเทียบ';
+  const falls = (rec.fallRisks || []).map(f => FALLS.find(x => x.id === f)?.t || f);
+  return `<div class="pd">
+    <p class="org">${esc(br ? br.name : '')}</p>
+    <h1>แบบประเมินความสามารถในการปฏิบัติกิจวัตรประจำวัน<br>Barthel ADL Index (คะแนนเต็ม 20)</h1>
+    <div class="kv"><div>ชื่อ-สกุล: <b>${esc(p.name)}</b></div><div>HN: ${esc(p.hn || '-')}</div>
+      <div>อายุ: ${a ? a + ' ปี' : '-'}</div><div>ตึก / ห้อง: ${esc(b ? b.name : '-')} / ${esc(p.room || '-')}</div>
+      <div>วันที่ประเมิน: <b>${fmtDate(rec.date)}</b></div><div>ผู้ประเมิน: ${esc(rec.assessorName)}</div></div>
+    <table><thead><tr><th>กิจกรรม</th><th>ระดับที่ประเมิน (สิ่งที่ทำได้จริงใน 24–48 ชั่วโมงที่ผ่านมา)</th><th>คะแนน</th></tr></thead><tbody>${rows}
+      <tr><td colspan="2" style="text-align:right"><b>คะแนนรวม</b></td><td style="text-align:center"><b>${rec.total}</b> / 20</td></tr></tbody></table>
+    <div class="res"><div class="big">${rec.total}<small>/20</small></div><div><b>กลุ่ม${g.label}</b> (คะแนน ${g.range}) — ${g.sub}<br><small>${esc(cmp)}</small></div></div>
+    <p><b>แนวทางการดูแล</b></p><ul>${g.plan.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    <p><b>ปัจจัยเสี่ยงหกล้ม:</b> ${falls.length ? esc(falls.join(' · ')) : 'ไม่พบ'}</p>
+    <p><b>หมายเหตุ:</b> ${esc(rec.note || '-')}</p>
+    <div class="sig"><div>ผู้ประเมิน<br>(${esc(rec.assessorName)})</div><div>พยาบาลผู้ตรวจสอบ<br>(............................)</div><div>ผู้ดูแล / ญาติรับทราบ<br>(............................)</div></div>
+    ${pfoot()}</div>`;
+}
+async function printAssessment(pid, aid) {
+  const p = S.patients.find(x => x.id === pid); if (!p) return;
+  let list; try { list = await api('history', {patientId: pid}); H[pid] = list; } catch (e) { toast(e.message, true); return; }
+  const i = aid ? list.findIndex(a => a.id === aid) : 0;
+  if (i < 0) { toast('ไม่พบผลประเมินที่ต้องการพิมพ์', true); return; }
+  doPrint(assessDoc(p, list[i], list[i + 1] || null), `ADL_${p.name}_${list[i].date}`);
+}
+function censusTable(pts) {
+  const rows = pts.slice().sort((a, b) => String(a.room).localeCompare(String(b.room), 'th', {numeric:true}) || a.name.localeCompare(b.name, 'th')).map(p => {
+    const l = S.latest[p.id]?.last, a = ageOf(p);
+    return `<tr><td>${esc(p.room || '-')}</td><td>${esc(p.name)}</td><td style="text-align:center">${a ?? '-'}</td><td style="text-align:center">${l ? l.total + ' / 20' : '-'}</td><td>${l ? GROUPS[l.group].label : 'ยังไม่ประเมิน'}</td><td>${l ? fmtDate(l.date) : '-'}</td><td>${l && l.fallRisks.length ? 'เสี่ยงหกล้ม ' + l.fallRisks.length + ' ปัจจัย' : ''}</td></tr>`;
+  }).join('');
+  return `<table><thead><tr><th>ห้อง</th><th>ชื่อ-สกุล</th><th>อายุ</th><th>คะแนน</th><th>กลุ่ม</th><th>ประเมินล่าสุด</th><th>หมายเหตุ</th></tr></thead><tbody>${rows || '<tr><td colspan="7">ไม่มีข้อมูล</td></tr>'}</tbody></table>`;
+}
+function printCensus(bid) {
+  const b = bldOf(bid); if (!b) return;
+  const pts = activePatients().filter(p => p.buildingId === bid), st = stats(pts);
+  doPrint(`<div class="pd"><p class="org">${esc(branchOf(b.branchId)?.name || '')}</p><h1>รายชื่อผู้รับบริการและผลประเมิน ADL<br>${esc(b.name)}</h1>
+    <p style="text-align:center">ข้อมูล ณ ${fmtDate(today())}</p>
+    <p>ผู้รับบริการ <b>${st.n}</b> คน · ติดสังคม ${st.social} · ติดบ้าน ${st.home} · ติดเตียง ${st.bed} · ยังไม่ประเมิน ${st.none} · เกินกำหนดประเมินซ้ำ ${st.overdue}</p>
+    ${censusTable(pts)}${pfoot()}</div>`, `ADL_${b.name}_${today()}`);
+}
+
+/* ===================== รายงาน (ผู้ดูแลระบบ) ===================== */
+const avgOf = a => a.length ? (a.reduce((x, y) => x + y, 0) / a.length).toFixed(1) : '-';
+function computeReport() {
+  const br = S.rep.branch, pts = activePatients().filter(p => br === 'all' || p.branchId === br), st = stats(pts);
+  const lastOf = p => S.latest[p.id]?.last;
+  const blds = S.buildings.filter(b => b.active !== 'FALSE' && (br === 'all' || b.branchId === br)).map(b => {
+    const bp = pts.filter(p => p.buildingId === b.id);
+    return {b, s: stats(bp), avg: avgOf(bp.map(p => lastOf(p)?.total).filter(v => v != null))};
+  });
+  const falls = {}; FALLS.forEach(f => falls[f.id] = 0);
+  const follow = [];
+  pts.forEach(p => {
+    const e = S.latest[p.id], l = e?.last, why = [];
+    if (!l) why.push(['ยังไม่เคยประเมิน', '']);
+    else {
+      const d = daysSince(l.date);
+      if (RANK[l.group] < RANK[e.prev ? e.prev.group : l.group]) why.push(['ระดับลดลงจากครั้งก่อน', 'bad']);
+      if (d > CONFIG.REASSESS_DAYS) why.push([`เกินกำหนดประเมินซ้ำ (${d} วัน)`, 'warn']);
+      if (l.fallRisks.length >= 2) why.push([`เสี่ยงหกล้ม ${l.fallRisks.length} ปัจจัย`, 'warn']);
+      l.fallRisks.forEach(f => { if (f in falls) falls[f]++; });
+    }
+    if (why.length) follow.push({p, l, why});
+  });
+  const sev = x => x.why.some(w => w[1] === 'bad') ? 1 : 0;
+  follow.sort((a, b) => sev(b) - sev(a) || b.why.length - a.why.length);
+  const ids = new Set(pts.map(p => p.id)), all = (R.assess || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+  const cut = dayNum(today()) - S.rep.days, staff = {}, byP = {};
+  all.forEach(a => { (byP[a.patientId] = byP[a.patientId] || []).push(a); if (ids.has(a.patientId) && dayNum(a.date) >= cut) staff[a.assessorName] = (staff[a.assessorName] || 0) + 1; });
+  const now = new Date(today() + 'T00:00:00'), months = [];
+  for (let i = 5; i >= 0; i--) {
+    const end = i === 0 ? today() : new Date(now.getFullYear(), now.getMonth() - i + 1, 0).toLocaleDateString('sv-SE');
+    const s = {social:0, home:0, bed:0, none:0, n:0};
+    pts.forEach(p => { let m = null; for (const a of (byP[p.id] || [])) if (a.date <= end) m = a; if (m) { s[m.group]++; s.n++; } });
+    months.push({label: new Date(now.getFullYear(), now.getMonth() - i, 1).toLocaleDateString('th-TH', {month:'short', year:'2-digit'}), s});
+  }
+  return {pts, st, avg: avgOf(pts.map(p => lastOf(p)?.total).filter(v => v != null)), blds, follow, falls, months,
+    staff: Object.entries(staff).sort((a, b) => b[1] - a[1])};
+}
+function reportHtml() {
+  const rep = computeReport(); R.rep = rep;
+  const assessed = rep.st.n - rep.st.none, maxS = Math.max(1, ...rep.staff.map(x => x[1]));
+  const flag = ([t, c]) => `<span class="flag ${c}">${esc(t)}</span>`;
+  return `<div class="rep-f"><select id="rb" aria-label="สาขา"><option value="all">ทุกสาขา</option>${S.branches.map(b => opt(b.id, b.shortName || b.name, S.rep.branch === b.id)).join('')}</select>
+    <select id="rd" aria-label="ช่วงเวลา">${[30, 90, 180, 365].map(d => opt(d, 'ย้อนหลัง ' + d + ' วัน', S.rep.days === d)).join('')}</select></div>
+  <section class="card overview"><div class="kpi"><div><b>${rep.st.n}</b><span>ผู้รับบริการ</span></div><div><b>${rep.avg}</b><span>คะแนนเฉลี่ย /20</span></div><div><b>${rep.st.overdue + rep.st.none}</b><span>ต้องประเมิน</span></div></div>${segBar(rep.st)}${legend(rep.st)}</section>
+  <h2>รายตึก</h2>${rep.blds.map(x => `<a class="bcard" href="#/b/${esc(x.b.id)}"><div class="row"><h3>${esc(x.b.name)}</h3><span class="mut">${esc(bShort(x.b.branchId))} · ${x.s.n} คน · เฉลี่ย ${x.avg}</span></div>${segBar(x.s)}<p class="mut">ติดสังคม <b>${x.s.social}</b> · ติดบ้าน <b>${x.s.home}</b> · ติดเตียง <b>${x.s.bed}</b>${x.s.none ? ` · ยังไม่ประเมิน <b>${x.s.none}</b>` : ''}${x.s.overdue ? ` · เกินกำหนด <b>${x.s.overdue}</b>` : ''}</p></a>`).join('') || '<p class="empty">ไม่มีตึก</p>'}
+  <h2>ต้องติดตาม (${rep.follow.length} คน)</h2>
+  <section class="card">${rep.follow.length ? rep.follow.slice(0, 30).map(({p, l, why}) => `<a class="frow" href="#/p/${esc(p.id)}"><b>${esc(p.name)}</b> <span class="mut">${esc(bShort(p.branchId))} · ${esc(bldOf(p.buildingId)?.name || '')} · ห้อง ${esc(p.room || '-')}${l ? ' · ' + l.total + '/20' : ''}</span><div class="flags">${why.map(flag).join('')}</div></a>`).join('') + (rep.follow.length > 30 ? `<p class="mut" style="margin-top:8px">และอีก ${rep.follow.length - 30} คน — ดูครบในเอกสารพิมพ์</p>` : '') : '<p class="empty">ไม่มีรายการที่ต้องติดตาม</p>'}</section>
+  <h2>ปัจจัยเสี่ยงหกล้มที่พบ</h2>
+  <section class="card">${FALLS.map(f => `<div class="ibar"><span>${esc(f.t)}</span><span class="tr"><i style="width:${assessed ? rep.falls[f.id] / assessed * 100 : 0}%;background:var(--home)"></i></span><span>${rep.falls[f.id]}</span></div>`).join('')}<p class="mut" style="margin-top:6px">นับจากผลประเมินล่าสุดของผู้ที่ประเมินแล้ว ${assessed} คน</p></section>
+  <h2>สัดส่วนกลุ่มรายเดือน</h2>
+  <section class="card">${rep.months.map(m => `<div class="mrow"><span>${m.label}</span>${segBar(m.s)}<span>${m.s.n}</span></div>`).join('')}<ul class="legend" style="margin-top:6px">${['social','home','bed'].map(g => `<li data-g="${g}"><i></i>${GROUPS[g].label}</li>`).join('')}</ul><p class="mut" style="margin-top:4px">ตัวเลขท้ายแถว = จำนวนผู้ที่มีผลประเมิน ณ สิ้นเดือนนั้น</p></section>
+  <h2>การประเมินโดยพนักงาน (${S.rep.days} วัน)</h2>
+  <section class="card">${rep.staff.length ? rep.staff.map(([n, c]) => `<div class="ibar"><span>${esc(n)}</span><span class="tr"><i style="width:${c / maxS * 100}%;background:var(--teal)"></i></span><span>${c}</span></div>`).join('') : '<p class="empty">ยังไม่มีการประเมินในช่วงนี้</p>'}</section>
+  <div class="acts" style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn" data-act="printReport">พิมพ์รายงาน</button><button class="btn ghost" data-act="export">ดาวน์โหลด CSV</button><button class="btn ghost" data-act="refresh">รีเฟรชข้อมูล</button></div>`;
+}
+async function loadReport() {
+  if (!R.assess) { try { R.assess = await api('reportData'); } catch (e) { toast(e.message, true); return; } }
+  const box = $('#rbody'); if (box) box.innerHTML = reportHtml();
+}
+async function refreshReport() {
+  R.assess = null; try { await loadAll(); } catch (e) { toast(e.message, true); }
+  render(true); toast('รีเฟรชแล้ว');
+}
+function reportDoc(rep) {
+  const scope = S.rep.branch === 'all' ? 'เชียงใหม่เนอร์สซิ่งโฮมแคร์ และ แทรงควิลา เอลเดอร์ลี่แคร์ (ทุกสาขา)' : (branchOf(S.rep.branch)?.name || '');
+  const tbl = (h, rows) => `<table><thead><tr>${h.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+  const c = v => `<td style="text-align:center">${v}</td>`;
+  const bRows = rep.blds.map(x => `<tr><td>${esc(bShort(x.b.branchId))} · ${esc(x.b.name)}</td>${[x.s.n, x.s.social, x.s.home, x.s.bed, x.s.none, x.s.overdue, x.avg].map(c).join('')}</tr>`).join('');
+  const fRows = rep.follow.map(({p, l, why}) => `<tr><td>${esc(p.name)}</td><td>${esc(bShort(p.branchId))} · ${esc(bldOf(p.buildingId)?.name || '')} / ${esc(p.room || '-')}</td>${c(l ? l.total : '-')}<td>${l ? fmtDate(l.date) : '-'}</td><td>${esc(why.map(w => w[0]).join(', '))}</td></tr>`).join('');
+  const census = rep.blds.map(x => { const bp = rep.pts.filter(p => p.buildingId === x.b.id); return bp.length ? `<h3>${esc(bShort(x.b.branchId))} · ${esc(x.b.name)} (${bp.length} คน)</h3>${censusTable(bp)}` : ''; }).join('');
+  return `<div class="pd"><p class="org">${esc(scope)}</p><h1>รายงานสรุปการประเมิน ADL</h1><p style="text-align:center">ข้อมูล ณ ${fmtDate(today())}</p>
+    <p>ผู้รับบริการที่พักอยู่ <b>${rep.st.n}</b> คน · คะแนนเฉลี่ย <b>${rep.avg}</b>/20 · ติดสังคม ${rep.st.social} · ติดบ้าน ${rep.st.home} · ติดเตียง ${rep.st.bed} · ยังไม่ประเมิน ${rep.st.none} · เกินกำหนดประเมินซ้ำ ${rep.st.overdue}</p>
+    <h3>สรุปรายตึก</h3>${tbl(['ตึก','ทั้งหมด','ติดสังคม','ติดบ้าน','ติดเตียง','ยังไม่ประเมิน','เกินกำหนด','เฉลี่ย'], bRows || '<tr><td colspan="8">ไม่มีข้อมูล</td></tr>')}
+    <h3>ผู้รับบริการที่ต้องติดตาม (${rep.follow.length} คน)</h3>${rep.follow.length ? tbl(['ชื่อ-สกุล','ตึก / ห้อง','คะแนน','ประเมินล่าสุด','เหตุที่ต้องติดตาม'], fRows) : '<p>ไม่มี</p>'}
+    <h3>การประเมินโดยพนักงาน (ย้อนหลัง ${S.rep.days} วัน)</h3>${rep.staff.length ? tbl(['ผู้ประเมิน','จำนวนครั้ง'], rep.staff.map(([n, k]) => `<tr><td>${esc(n)}</td>${c(k)}</tr>`).join('')) : '<p>ไม่มีข้อมูล</p>'}
+    <div class="pbreak"></div><h2>รายชื่อผู้รับบริการและผลล่าสุดรายตึก</h2>${census}${pfoot()}</div>`;
+}
+function printReport() { if (R.rep) doPrint(reportDoc(R.rep), 'รายงาน_ADL_' + today()); }
+
+/* ===================== Router / render ===================== */
+function render(keep) {
+  const y = window.scrollY, app = $('#app');
+  if (!S.user) { app.innerHTML = loginView(); return; }
+  const [, r, id, sub] = location.hash.split('/');
+  const map = {b:buildingView, p:patientView, a:assessView, admin:adminView};
+  app.innerHTML = (map[r] || homeView)(id ? decodeURIComponent(id) : id, sub);
+  window.scrollTo(0, keep ? y : 0);
+  if (r === 'p' && id) loadHistory(decodeURIComponent(id));
+  if (r === 'a') updateDock();
+  if (r === 'admin' && id === 'staff') loadStaff();
+  if (r === 'admin' && !['patients','buildings','staff','export'].includes(id)) loadReport();
+}
+async function loadAll() {
+  const d = await api('bootstrap');
+  Object.assign(S, {user:d.user, branches:d.branches, buildings:d.buildings, patients:d.patients, latest:d.latest});
+  const saved = localStorage.getItem('adl_branch');
+  const ok = b => b === 'all' ? S.branches.length > 1 : S.branches.some(x => x.id === b);
+  S.branchId = ok(S.branchId) ? S.branchId : ok(saved) ? saved : (S.branches.length > 1 ? 'all' : S.branches[0]?.id);
+}
+function logout() {
+  S.token = null; S.user = null; A = null; localStorage.removeItem('adl_token'); closeModal(); location.hash = '#/'; render();
+}
+
+const handlers = {
+  branch: el => { S.branchId = el.dataset.id; localStorage.setItem('adl_branch', S.branchId); render(true); },
+  filter: el => { S.filter = el.dataset.id; render(true); },
+  menu: menuModal, close: () => { if (!S.user?.mustChangePin) closeModal(); }, logout, pin: () => pinForm(false), save: saveAssess, export: exportCsv,
+  addPatient: () => patientForm(), editPatient: el => patientForm(S.patients.find(p => p.id === el.dataset.id)),
+  addBuilding: el => buildingForm(null, el.dataset.id), editBuilding: el => buildingForm(bldOf(el.dataset.id)),
+  addStaff: () => staffForm(), editStaff: el => staffForm((S.staff || []).find(s => s.username === el.dataset.id)),
+  printA: el => printAssessment(el.dataset.pid, el.dataset.aid), printLast: el => printAssessment(el.dataset.id),
+  printCensus: el => printCensus(el.dataset.id), printReport, refresh: refreshReport,
+  resetDemo: () => { localStorage.removeItem('adl_demo'); closeModal(); loadAll().then(() => { render(); toast('รีเซ็ตข้อมูลทดลองแล้ว'); }); }
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && handlers[el.dataset.act]) handlers[el.dataset.act](el, e); });
+document.addEventListener('submit', e => { const f = e.target.closest('form[data-form]'); if (f) { e.preventDefault(); submitForm(f); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('.opt input')) {
+    A.scores[t.name] = +t.value;
+    t.closest('.item').querySelectorAll('.opt').forEach(o => o.classList.toggle('sel', o.querySelector('input').checked));
+    updateDock();
+  } else if (t.closest('.fr')) A.falls = [...document.querySelectorAll('.fr input:checked')].map(x => x.value);
+  else if (t.id === 'adate') A.date = t.value || today();
+  else if (t.id === 'f-branch') fillBuildings();
+  else if (t.id === 'ab') { S.adminBranch = t.value; render(true); }
+  else if (t.id === 'rb' || t.id === 'rd') { if (t.id === 'rb') S.rep.branch = t.value; else S.rep.days = +t.value; $('#rbody').innerHTML = reportHtml(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'q') { S.q = t.value; const id = decodeURIComponent(location.hash.split('/')[2] || ''); $('#plist').innerHTML = plist(id); }
+  else if (t.id === 'aq') { S.adminQ = t.value; const q = S.adminQ.trim().toLowerCase();
+    $('#alist').innerHTML = adminPlist(S.patients.filter(p => (S.adminBranch === 'all' || p.branchId === S.adminBranch) && (!q || [p.name, p.nickname, p.room, p.hn].some(x => String(x || '').toLowerCase().includes(q)))).sort((a, b) => a.name.localeCompare(b.name, 'th'))); }
+  else if (t.id === 'anote') A.note = t.value;
+});
+window.addEventListener('hashchange', () => { closeModal(); render(); if (pendingModal) { const f = pendingModal; pendingModal = null; f(); } });
+window.addEventListener('unhandledrejection', e => toast(e.reason?.message || 'เกิดข้อผิดพลาด', true));
+
+/* ===================== โหมดทดลอง (ไม่ต้องมี backend) ===================== */
+const Demo = {
+  users: {
+    admin: {username:'admin', name:'ผู้ดูแลระบบ (ทดลอง)', role:'admin', branchIds:'*', mustChangePin:false},
+    nurse: {username:'nurse', name:'พยาบาลนภา (ทดลอง)', role:'staff', branchIds:'b1,b2', mustChangePin:false}
+  },
+  who() { return Demo.users[localStorage.getItem('adl_dwho')] || Demo.users.admin; },
+  db() {
+    let d = null; try { d = JSON.parse(localStorage.getItem('adl_demo')); } catch (e) {}
+    if (!d) { d = Demo.seed(); Demo.save(d); }
+    return d;
+  },
+  save(d) { localStorage.setItem('adl_demo', JSON.stringify(d)); },
+  seed() {
+    const names = ['สมศรี ใจดี','บุญมี รักสงบ','วิชัย สุขเกษม','ลำดวน แก้วมณี','ประยงค์ ศรีสวัสดิ์','สมหมาย ทองดี','อรทัย พึ่งบุญ','ชูชาติ มั่นคง','เพ็ญศรี วงศ์ไทย','สุนทร ดีเลิศ','มะลิ หอมชื่น','ทองใบ เพชรงาม'];
+    const profiles = [[2,1,2,1,3,3,2,2,2,2],[2,1,2,0,3,2,1,2,2,1],[2,1,1,0,2,1,0,1,1,1],[1,0,1,0,2,1,0,1,1,0],[1,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]];
+    const keys = Object.keys(MAXS), iso = n => new Date(Date.now() - n * 864e5).toLocaleDateString('sv-SE', {timeZone:'Asia/Bangkok'});
+    const d = {branches:[], buildings:[], patients:[], assess:[], staff:[{username:'admin', name:'ผู้ดูแลระบบ (ทดลอง)', role:'admin', branchIds:'*', active:'TRUE'}, {username:'nurse', name:'พยาบาลนภา (ทดลอง)', role:'staff', branchIds:'b1,b2', active:'TRUE'}]};
+    ['สาขา 1','สาขา 2','สาขา 3','สาขา 4','Tranquila'].forEach((s, i) => {
+      d.branches.push({id:'b' + (i + 1), name: i < 4 ? 'เชียงใหม่เนอร์สซิ่งโฮมแคร์ ' + s : 'แทรงควิลา เอลเดอร์ลี่แคร์', shortName:s, active:'TRUE'});
+      d.buildings.push({id:'bl' + (i + 1) + 'a', branchId:'b' + (i + 1), name:'ตึก 1', active:'TRUE'});
+    });
+    d.buildings.push({id:'bl1b', branchId:'b1', name:'ตึก 2', active:'TRUE'});
+    names.forEach((n, i) => {
+      const bl = i < 5 ? 'bl1a' : i < 8 ? 'bl1b' : i < 10 ? 'bl2a' : 'bl5a', br = bl.startsWith('bl1') ? 'b1' : bl === 'bl2a' ? 'b2' : 'b5';
+      const p = {id:'p' + i, hn:String(1000 + i), name:'คุณ' + n, nickname:'', branchId:br, buildingId:bl, room:String(101 + i), birthYear:String(1935 + i * 3), admitDate:iso(300), status:'active', createdAt:''};
+      d.patients.push(p);
+      if (i === 11) return;                                    // ยังไม่เคยประเมิน
+      const pr = profiles[i % 6], older = i % 4 === 0 ? profiles[Math.min(5, (i % 6) + 1)] : null;
+      const mk = (sc, ago, k) => { const t = Object.values(sc).reduce((a, b) => a + b, 0); return {id:'a' + i + k, patientId:p.id, date:iso(ago), scores:sc, total:t, group:groupOf(t), fallRisks: i % 3 === 0 ? ['env'] : [], note:'', assessorName: i % 2 ? 'พยาบาลนภา (ทดลอง)' : 'ผู้ช่วยสมชาย (ทดลอง)', createdAt:iso(ago)}; };
+      if (older) d.assess.push(mk(Object.fromEntries(keys.map((k, j) => [k, older[j]])), 70, 'o'));
+      if (i % 3 === 0) d.assess.push(mk(Object.fromEntries(keys.map((k, j) => [k, profiles[Math.min(5, (i % 6) + 2)][j]])), 130, 'p'));
+      d.assess.push(mk(Object.fromEntries(keys.map((k, j) => [k, pr[j]])), i % 5 === 1 ? 45 : 3 + i, 'n'));
+    });
+    return d;
+  },
+  latest(list) {
+    const m = {}; list.slice().sort((a, b) => (a.date + a.createdAt) < (b.date + b.createdAt) ? -1 : 1).forEach(a => { m[a.patientId] = {last:a, prev:m[a.patientId]?.last || null}; });
+    return m;
+  },
+  async call(a, p) {
+    const d = Demo.db(), me = Demo.who();
+    if (['savePatient','saveBuilding','listStaff','saveStaff','exportAll','reportData'].includes(a) && me.role !== 'admin') throw new Error('ต้องเป็นผู้ดูแลระบบ');
+    switch (a) {
+      case 'login': { const u = Demo.users[String(p.username).trim().toLowerCase()]; if (u && p.pin === '1234') { localStorage.setItem('adl_dwho', u.username); return {token:'demo', user:u}; } throw new Error('โหมดทดลอง: ใช้ admin หรือ nurse / PIN 1234'); }
+      case 'bootstrap': {
+        const sc = me.branchIds === '*' ? null : me.branchIds.split(','), ok = b => !sc || sc.includes(b);
+        const pts = d.patients.filter(x => ok(x.branchId)), ids = new Set(pts.map(x => x.id));
+        return {user:me, branches:d.branches.filter(b => ok(b.id)), buildings:d.buildings.filter(b => ok(b.branchId)), patients:pts, latest:Demo.latest(d.assess.filter(a => ids.has(a.patientId)))};
+      }
+      case 'history': return d.assess.filter(x => x.patientId === p.patientId).sort((x, y) => (x.date + x.createdAt) < (y.date + y.createdAt) ? 1 : -1);
+      case 'saveAssessment': {
+        const total = Object.values(p.scores).reduce((x, y) => x + y, 0);
+        const rec = {id:'a' + Date.now(), patientId:p.patientId, date:p.date, scores:p.scores, total, group:groupOf(total), fallRisks:p.fallRisks, note:p.note, assessorName:me.name, createdAt:new Date().toISOString()};
+        d.assess.push(rec); Demo.save(d); return rec;
+      }
+      case 'savePatient': {
+        const rec = {status:'active', ...p, id:p.id || 'p' + Date.now(), createdAt:''};
+        const i = d.patients.findIndex(x => x.id === rec.id); if (i >= 0) d.patients[i] = rec; else d.patients.push(rec);
+        Demo.save(d); return rec;
+      }
+      case 'saveBuilding': {
+        if (p.id) { const b = d.buildings.find(x => x.id === p.id); b.name = p.name; b.active = p.active ? 'TRUE' : 'FALSE'; }
+        else d.buildings.push({id:'bl' + Date.now(), branchId:p.branchId, name:p.name, active:'TRUE'});
+        Demo.save(d); return true;
+      }
+      case 'listStaff': return d.staff;
+      case 'saveStaff': { const i = d.staff.findIndex(x => x.username === p.username); const rec = {username:p.username, name:p.name, role:p.role, branchIds:p.role === 'admin' ? '*' : p.branchIds, active:p.active ? 'TRUE' : 'FALSE'}; if (i >= 0) d.staff[i] = rec; else d.staff.push(rec); Demo.save(d); return true; }
+      case 'reportData': return d.assess.map(x => ({patientId:x.patientId, date:x.date, total:x.total, group:x.group, fallRisks:x.fallRisks, assessorName:x.assessorName}));
+      case 'changePin': return true;
+      case 'exportAll': {
+        const keys = Object.keys(MAXS), rows = [['วันที่ประเมิน','สาขา','ตึก','ห้อง','HN','ชื่อ-สกุล', ...ITEMS.map(i => i.th), 'คะแนนรวม','กลุ่ม','หมายเหตุ','ผู้ประเมิน']];
+        d.assess.forEach(x => { const pt = d.patients.find(q => q.id === x.patientId); if (!pt) return;
+          rows.push([x.date, d.branches.find(b => b.id === pt.branchId)?.shortName, d.buildings.find(b => b.id === pt.buildingId)?.name, pt.room, pt.hn, pt.name, ...ITEMS.map(i => x.scores[i.k]), x.total, GROUPS[x.group].label, x.note, x.assessorName]); });
+        return rows;
+      }
+    }
+    throw new Error('unknown action');
+  }
+};
+
+/* ===================== เริ่มทำงาน ===================== */
+(async function boot() {
+  S.token = localStorage.getItem('adl_token');
+  if (S.token) { try { await loadAll(); if (S.user.mustChangePin) pinForm(true); } catch (e) { S.token = null; S.user = null; } }
+  render();
+})();
+</script>
+</body>
+</html>
